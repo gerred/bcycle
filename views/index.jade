@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  div(ng-controller='MainCtrl')
+    #map
+    input(ng-model='city')
+    ul
+      li(ng-repeat='station in stations|filter:{city:city}|filter:{active:true}|filter:maxDistance|orderBy:distance') {{station.name}} {{station.bikesAvailable}} {{distance(station)}} mi
+

@@ -11,6 +11,7 @@ var express = require('express')
   , request = require('request')
   , async = require('async')
   , crc = require('crc')
+  , S = require('string')
   , Firebase = require('firebase')
   , stationsRef = new Firebase('https://bcycle.firebaseIO.com/stations');
 
@@ -46,18 +47,22 @@ var checkBikes = function() {
         body.d.list.map(function(stationJson) {
             var station = new Station(stationJson, crc.crc32(JSON.stringify(stationJson)))
 
-            if (stationsRef.child(station.id).crc !== station.crc) {
-                if (typeof station.city !== undefined) {
-                    stationsRef.child(station.state).child(station.id).set(station)
+            if (stationsRef.child(S(station.state).slugify().s).child(station.id).crc !== station.crc) {
+                if (typeof station.state !== undefined) {
+                  if (station.active) {
+                    stationsRef.child(S(station.state).slugify().s).child(station.id).set(station)
+                  } else {
+                    stationsRef.child(S(station.state).slugify().s).child(station.id).set(null)
+                  }
                 }
             }
         })
 
-        setTimeout(checkBikes, 500)
+        setTimeout(checkBikes, 10 * 1000)
     })
 }
 
-setTimeout(checkBikes, 500)
+checkBikes()
 
 function Station(params, crc) {
     this.crc = crc

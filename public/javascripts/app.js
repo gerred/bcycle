@@ -1,7 +1,8 @@
+/*jshint asi:true, laxcomma:true */
 angular.module('bcycle', ['firebase'])
   .controller('MainCtrl', ['$scope', 'angularFireCollection',
     function MainCtrl($scope, angularFireCollection) {
-        var state = 'CO'
+        var state = 'co';
         var markerLayer;
         var map = L.map('map').setView([51.505, -0.09], 1);
         map.locate({setView: true, maxZoom: 16});
@@ -14,7 +15,12 @@ angular.module('bcycle', ['firebase'])
             $scope.stations = angularFireCollection(url, function(stations) {
                 $scope.setupMarkers(stations)
                 stations.ref().on('child_changed', function(val) {
-                    val.val().changed = true
+                    var newStation = val.val()
+                    var oldStation = _.detect($scope.stations, function(_station) {
+                      return newStation.id === _station.id
+                    })
+
+                    console.log(newStation.bikesAvailable - oldStation.bikesAvailable)
                     $scope.setupMarkers(stations)
                 });
             });
